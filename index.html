@@ -2,41 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earthquake Map</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
+    <title>Lab 3: Earthquake Data</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBntMNu96czgDPEnF9MBJnu0TzF5x9zyi1MsW7CSmEl6r4woK7GZQ1HTTMyOK5QdHc7Fb9vWg7Gbb7GPsPg==" crossorigin=""/>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        #map {
+            height: 100vh;
+        }
+    </style>
 </head>
 <body>
     <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-dw5E3vkw7Jq1nDFUor2Wx4Q2vGZ4YKaAN2DJz1sQkWB0U20wxWqURF3K07ZZff5nU9fU11O9E2UBoS9w06E5pA==" crossorigin=""></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydHliZXJ0eTEyMyIsImEiOiJjbHljZmY3eDIxbjl2MmlvbWVvYTBvcXZiIn0.mI6pI_PqDEIcWn7rvCXF_w';
-        const map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [-98.5795, 39.8283],
-            zoom: 3
-        });
+        var map = L.map('map').setView([0, 0], 2);
 
-        map.on('load', () => {
-            map.addSource('earthquakes', {
-                type: 'geojson',
-                data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson'
-            });
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoiYmVydHliZXJ0eTEyMyIsImEiOiJjbHljZmY3eDIxbjl2MmlvbWVvYTBvcXZiIn0.mI6pI_PqDEIcWn7rvCXF_w'
+        }).addTo(map);
 
-            map.addLayer({
-                'id': 'earthquakes-layer',
-                'type': 'circle',
-                'source': 'earthquakes',
-                'paint': {
-                    'circle-radius': 4,
-                    'circle-stroke-width': 2,
-                    'circle-color': 'red',
-                    'circle-stroke-color': 'white'
-                }
+        axios.get('assets/earthquakes.geojson')
+            .then(function (response) {
+                L.geoJSON(response.data).addTo(map);
+            })
+            .catch(function (error) {
+                console.log(error);
             });
-        });
     </script>
 </body>
 </html>
