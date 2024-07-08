@@ -1,133 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
     <title>Earthquake Map and List</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+    <!-- Including the Mapbox GL CSS file -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+
+    <!-- Including the Mapbox GL JS file -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+
     <style>
+        /* CSS styles for the layout and components */
         body {
-            display: flex;
-            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        #map {
-            width: 70%;
+            display: flex;
             height: 100vh;
+            font-family: Arial, sans-serif;
         }
-        #sidebar {
-            width: 30%;
-            padding: 20px;
+
+        #side-panel {
+            flex-basis: 30%;
             overflow-y: auto;
+            padding: 20px;
         }
+
+        #map {
+            flex-grow: 1;
+        }
+
+        button {
+            margin-bottom: 10px;
+        }
+
         table {
-            width: 100%;
             border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid #ddd;
         }
+
         th, td {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
+            text-align: left;
+            padding: 16px;
         }
-        th {
-            background-color: #f4f4f4;
-            cursor: pointer;
-        }
+
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
     </style>
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="map"></div>
-    <div id="sidebar">
-        <h1>Earthquake List</h1>
-        <button onclick="sortTable(1)">Sort by Magnitude</button>
-        <table id="earthquakeTable">
-            <thead>
-                <tr>
-                    <th>id</th>
-                    <th>magnitude</th>
-                    <th>timestamp</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Data will be inserted here -->
-            </tbody>
-        </table>
-    </div>
+    <main id="container">
+        <div id="side-panel">
+            <h2>Earthquake List</h2>
+            <button onclick="sortTable()">Sort by Magnitude</button>
+            <table id="earthquakeTable">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>magnitude</th>
+                        <th>timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <div id="map"></div>
+    </main>
 
     <script>
+        // Define the Mapbox access token
         mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydHliZXJ0eTEyMyIsImEiOiJjbHljZmY3eDIxbjl2MmlvbWVvYTBvcXZiIn0.mI6pI_PqDEIcWn7rvCXF_w';
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [138.2529, 36.2048],
-            zoom: 5
+
+        // Create the map object
+        let map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/satellite-v9', // style URL
+            zoom: 5.5, // starting zoom
+            center: [138, 38] // starting center
         });
 
-        map.on('load', function() {
-            map.addSource('earthquakes', {
-                'type': 'geojson',
-                'data': 'assets/earthquakes.geojson'
-            });
+        async function geojsonFetch() {
+            let response, earthquakes, japan, table;
+            response = await fetch('assets/earthquakes.geojson');
+            earthquakes = await response.json();
+            response = await fetch('assets/japan.json');
+            japan = await response.json();
 
-            map.addLayer({
-                'id': 'earthquakes-layer',
-                'type': 'circle',
-                'source': 'earthquakes',
-                'paint': {
-                    'circle-radius': 4,
-                    'circle-color': '#FF5722'
-                }
-            });
-        });
+            table = document.getElementById("earthquakeTable").getElementsByTagName("tbody")[0];
+            let row, cell1, cell2, cell3;
+            for (let i = 0; i < earthquakes.features.length; i++) {
+                // Create an empty <tr> element and add it to the 1st position of the table:
+                row = table.insertRow(-1);
+                cell1 = row.insertCell(0);
+                cell2 = row.insertCell(1);
+                cell3 = row.insertCell(2);
+                cell1.innerHTML = earthquakes.features[i].properties.id;
+                cell2.innerHTML = earthquakes.features[i].properties.mag;
+                cell3.innerHTML = new Date(earthquakes.features[i].properties.time).toLocaleDateString("en-US");
+            }
 
-        fetch('assets/earthquakes.geojson')
-            .then(response => response.json())
-            .then(data => {
-                const table = document.getElementById('earthquakeTable').getElementsByTagName('tbody')[0];
-                data.features.forEach((feature, index) => {
-                    const row = table.insertRow();
-                    const idCell = row.insertCell(0);
-                    const magCell = row.insertCell(1);
-                    const timeCell = row.insertCell(2);
+            // Load data to the map as new layers and table on the side.
+            map.on('load', function loadingData() {
+                map.addSource('earthquakes', {
+                    type: 'geojson',
+                    data: earthquakes
+                });
 
-                    idCell.textContent = feature.properties.id;
-                    magCell.textContent = feature.properties.mag;
-                    timeCell.textContent = new Date(feature.properties.time).toLocaleString();
+                map.addLayer({
+                    'id': 'earthquakes-layer',
+                    'type': 'circle',
+                    'source': 'earthquakes',
+                    'paint': {
+                        'circle-radius': 8,
+                        'circle-stroke-width': 2,
+                        'circle-color': 'red',
+                        'circle-stroke-color': 'white'
+                    }
+                });
+
+                map.addSource('japan', {
+                    type: 'geojson',
+                    data: japan
+                });
+
+                map.addLayer({
+                    'id': 'japan-layer',
+                    'type': 'fill',
+                    'source': 'japan',
+                    'paint': {
+                        'fill-color': '#0080ff', // blue color fill
+                        'fill-opacity': 0.5
+                    }
                 });
             });
+        }
 
-        function sortTable(n) {
-            const table = document.getElementById("earthquakeTable");
-            let switching = true, dir = "asc", switchcount = 0;
+        geojsonFetch();
+
+        function sortTable() {
+            let table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("earthquakeTable");
+            switching = true;
+            /* Make a loop that will continue until no switching has been done: */
             while (switching) {
+                // Start by saying: no switching is done:
                 switching = false;
-                const rows = table.rows;
-                for (let i = 1; i < (rows.length - 1); i++) {
-                    let shouldSwitch = false;
-                    const x = rows[i].getElementsByTagName("TD")[n];
-                    const y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (dir == "asc" && parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
-                        shouldSwitch = true;
-                        break;
-                    } else if (dir == "desc" && parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+                rows = table.rows;
+                /* Loop through all table rows (except the first, which contains table headers): */
+                for (i = 1; i < (rows.length - 1); i++) {
+                    // Start by saying there should be no switching:
+                    shouldSwitch = false;
+                    /* Get the two elements you want to compare,
+                    one from current row and one from the next: */
+                    x = parseFloat(rows[i].getElementsByTagName("td")[1].innerHTML);
+                    y = parseFloat(rows[i + 1].getElementsByTagName("td")[1].innerHTML);
+                    // Check if the two rows should switch place:
+                    if (x < y) {
+                        // If so, mark as a switch and break the loop:
                         shouldSwitch = true;
                         break;
                     }
                 }
                 if (shouldSwitch) {
+                    /* If a switch has been marked, make the switch
+                    and mark that a switch has been done: */
                     rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                     switching = true;
-                    switchcount++;
-                } else {
-                    if (switchcount == 0 && dir == "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
                 }
             }
         }
