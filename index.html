@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-dw5E3vkw7Jq1nDFUor2Wx4Q2vGZ4YKaAN2DJz1sQkWB0U20wxWqURF3K07ZZff5nU9fU11O9E2UBoS9w06E5pA==" crossorigin=""></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        var map = L.map('map').setView([0, 0], 2);
+        var map = L.map('map').setView([35.6895, 139.6917], 5); // Centered on Tokyo, Japan
 
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -33,7 +33,21 @@
 
         axios.get('assets/earthquakes.geojson')
             .then(function (response) {
-                L.geoJSON(response.data).addTo(map);
+                L.geoJSON(response.data, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, {
+                            radius: feature.properties.mag * 2,
+                            fillColor: "red",
+                            color: "darkred",
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    },
+                    onEachFeature: function (feature, layer) {
+                        layer.bindPopup("Magnitude: " + feature.properties.mag + "<br>Location: " + feature.properties.place);
+                    }
+                }).addTo(map);
             })
             .catch(function (error) {
                 console.log(error);
