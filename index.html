@@ -5,10 +5,8 @@
     <title>Shooting Incidents in NYC</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 
-    <!-- Including the Mapbox GL CSS file -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
 
-    <!-- Including the Mapbox GL JS file -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
 
     <style>
@@ -30,8 +28,8 @@
             top: 0;
             right: 0;
             height: 100%;
-            z-index: 1; /* Ensure the side panel is on top */
-            text-align: center; /* Center the title */
+            z-index: 1; 
+            text-align: center; /* Centers the title */
         }
         #map {
             flex-grow: 1;
@@ -80,9 +78,9 @@
 
         let map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/light-v10', // Different style from the tutorial
+            style: 'mapbox://styles/mapbox/light-v10', 
             zoom: 10,
-            center: [-74.0060, 40.7128] // NYC coordinates
+            center: [-74.0060, 40.7128] // NYC cooridante i got from google
         });
 
         async function loadGeoJSON() {
@@ -99,7 +97,7 @@
             table = document.getElementsByTagName("table")[0];
             let row, cell1, cell2, cell3;
 
-            // Sort shootings by date initially
+            // Sort shootings by date by default, when the page loads
             shootings.features.sort((a, b) => new Date(a.properties.occur_date) - new Date(b.properties.occur_date));
 
             for (let feature of shootings.features) {
@@ -169,7 +167,7 @@
                     x = parseInt(rows[i].getElementsByTagName("td")[0].innerHTML);
                     y = parseInt(rows[i + 1].getElementsByTagName("td")[0].innerHTML);
 
-                    if (x < y) { // Reverse the order
+                    if (x < y) { // reverse it
                         shouldSwitch = true;
                         break;
                     }
