@@ -1,42 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Earthquake Map</title>
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthquakes List</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="map"></div>
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydHliZXJ0eTEyMyIsImEiOiJjbHljZmY3eDIxbjl2MmlvbWVvYTBvcXZiIn0.mI6pI_PqDEIcWn7rvCXF_w';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/satellite-v9',
-        zoom: 5.5,
-        center: [138, 38]
-    });
+    <div class="container">
+        <h1>Earthquakes List</h1>
+        <button onclick="sortTable()">Sort by Magnitude</button>
+        <table id="earthquakeTable">
+            <thead>
+                <tr>
+                    <th>Place</th>
+                    <th>Magnitude</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+        fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('earthquakeTable').getElementsByTagName('tbody')[0];
+                data.features.forEach(earthquake => {
+                    const row = table.insertRow();
+                    const cell1 = row.insertCell(0);
+                    const cell2 = row.insertCell(1);
+                    const cell3 = row.insertCell(2);
+                    cell1.innerHTML = earthquake.properties.place;
+                    cell2.innerHTML = earthquake.properties.mag;
+                    cell3.innerHTML = new Date(earthquake.properties.time).toLocaleDateString("en-US");
+                });
+            });
 
-    map.on('load', function () {
-        map.addSource('earthquakes', {
-            'type': 'geojson',
-            'data': 'assets/earthquakes.geojson'
-        });
-        map.addLayer({
-            'id': 'earthquakes',
-            'type': 'circle',
-            'source': 'earthquakes',
-            'paint': {
-                'circle-radius': 5,
-                'circle-color': '#ff0000'
+        function sortTable() {
+            const table = document.getElementById("earthquakeTable");
+            let rows, switching, i, x, y, shouldSwitch;
+            switching = true;
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[1];
+                    y = rows[i + 1].getElementsByTagName("TD")[1];
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
             }
-        });
-    });
-</script>
+        }
+    </script>
 </body>
 </html>
