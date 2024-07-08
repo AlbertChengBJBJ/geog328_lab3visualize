@@ -30,7 +30,6 @@
             top: 0;
             right: 0;
             height: 100%;
-            z-index: 1; /* Ensure the side panel is on top */
         }
         #map {
             flex-grow: 1;
@@ -89,11 +88,9 @@
             
             response = await fetch('delieverableData/NYPD Shooting Incident Data (Historic)_20240707.geojson');
             shootings = await response.json();
-            console.log('Shootings Data:', shootings);
 
             response = await fetch('delieverableData/Borough Boundaries.geojson');
             boundaries = await response.json();
-            console.log('Boundaries Data:', boundaries);
 
             table = document.getElementsByTagName("table")[0];
             let row, cell1, cell2, cell3;
@@ -104,9 +101,9 @@
                 cell2 = row.insertCell(1);
                 cell3 = row.insertCell(2);
 
-                cell1.innerHTML = feature.properties.INCIDENT_KEY;
-                cell2.innerHTML = new Date(feature.properties.OCCUR_DATE).toLocaleDateString("en-US");
-                cell3.innerHTML = feature.properties.BORO;
+                cell1.innerHTML = feature.properties.incident_key;
+                cell2.innerHTML = new Date(feature.properties.occur_date).toLocaleDateString("en-US");
+                cell3.innerHTML = feature.properties.boro;
             }
 
             map.on('load', function () {
@@ -141,8 +138,6 @@
                         'line-width': 2
                     }
                 });
-
-                console.log('Layers added to the map.');
             });
         }
 
