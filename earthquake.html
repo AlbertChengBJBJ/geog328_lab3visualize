@@ -2,110 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earthquake Data Table</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
         }
         th, td {
-            padding: 8px;
-            text-align: left;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
         }
         th {
-            cursor: pointer;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #f4f4f4;
         }
     </style>
 </head>
 <body>
     <h1>Earthquake Data Table</h1>
-    <table id="earthquakeTable">
+    <table id="earthquake-table">
         <thead>
             <tr>
-                <th onclick="sortTable(0)">Place</th>
-                <th onclick="sortTable(1)">Magnitude</th>
-                <th onclick="sortTable(2)">Time</th>
+                <th>ID</th>
+                <th>Magnitude</th>
+                <th>Location</th>
+                <th>Time</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Data will be inserted here by JavaScript -->
+            <!-- Data will be inserted here -->
         </tbody>
     </table>
 
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        axios.get('assets/earthquakes.geojson')
-            .then(function (response) {
-                var earthquakes = response.data.features;
-                var tableBody = document.getElementById('earthquakeTable').getElementsByTagName('tbody')[0];
+        fetch('assets/earthquakes.geojson')
+            .then(response => response.json())
+            .then(data => {
+                const table = document.getElementById('earthquake-table').getElementsByTagName('tbody')[0];
+                data.features.forEach((feature, index) => {
+                    const row = table.insertRow();
+                    const idCell = row.insertCell(0);
+                    const magCell = row.insertCell(1);
+                    const locCell = row.insertCell(2);
+                    const timeCell = row.insertCell(3);
 
-                earthquakes.forEach(function (earthquake) {
-                    var row = tableBody.insertRow();
-                    var placeCell = row.insertCell(0);
-                    var magCell = row.insertCell(1);
-                    var timeCell = row.insertCell(2);
-
-                    placeCell.innerHTML = earthquake.properties.place;
-                    magCell.innerHTML = earthquake.properties.mag;
-                    timeCell.innerHTML = new Date(earthquake.properties.time).toLocaleString();
+                    idCell.textContent = index + 1;
+                    magCell.textContent = feature.properties.mag;
+                    locCell.textContent = feature.properties.place;
+                    timeCell.textContent = new Date(feature.properties.time).toLocaleString();
                 });
-            })
-            .catch(function (error) {
-                console.log(error);
             });
-
-        function sortTable(n) {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("earthquakeTable");
-            switching = true;
-            dir = "asc";
-
-            while (switching) {
-                switching = false;
-                rows = table.rows;
-
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
-
-                    if (dir == "asc") {
-                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    } else if (dir == "desc") {
-                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                            shouldSwitch = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchcount++;
-                } else {
-                    if (switchcount == 0 && dir == "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
-                }
-            }
-        }
     </script>
 </body>
 </html>
