@@ -111,10 +111,10 @@
                     let shouldSwitch = false;
                     const x = rows[i].getElementsByTagName("TD")[n];
                     const y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (dir == "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    if (dir == "asc" && parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
                         shouldSwitch = true;
                         break;
-                    } else if (dir == "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    } else if (dir == "desc" && parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
                         shouldSwitch = true;
                         break;
                     }
