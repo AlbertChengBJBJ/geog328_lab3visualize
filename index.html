@@ -86,10 +86,10 @@
         async function loadGeoJSON() {
             let response, shootings, boundaries, table;
             
-            response = await fetch('assets/deliverableData/NYPD Shooting Incident Data (Historic)_20240707.geojson');
+            response = await fetch('deliverableData/NYPD Shooting Incident Data (Historic)_20240707.geojson');
             shootings = await response.json();
 
-            response = await fetch('assets/deliverableData/Borough Boundaries.geojson');
+            response = await fetch('deliverableData/Borough Boundaries.geojson');
             boundaries = await response.json();
 
             table = document.getElementsByTagName("table")[0];
