@@ -79,7 +79,7 @@
 
         let map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/dark-v10', // Different style from the tutorial
+            style: 'mapbox://styles/mapbox/light-v10', // Different style from the tutorial
             zoom: 10,
             center: [-74.0060, 40.7128] // NYC coordinates
         });
@@ -98,7 +98,7 @@
             table = document.getElementsByTagName("table")[0];
             let row, cell1, cell2, cell3;
 
-            for (let feature of shootings.features.reverse()) { // Reverse order to show unsorted data initially
+            for (let feature of shootings.features) {
                 row = table.insertRow(-1);
                 cell1 = row.insertCell(0);
                 cell2 = row.insertCell(1);
@@ -120,8 +120,8 @@
                     'type': 'circle',
                     'source': 'shootings',
                     'paint': {
-                        'circle-radius': 6,
-                        'circle-color': 'rgba(255, 0, 0, 0.6)',
+                        'circle-radius': 5,
+                        'circle-color': 'red',
                         'circle-stroke-width': 1,
                         'circle-stroke-color': 'white'
                     }
@@ -137,8 +137,8 @@
                     'type': 'line',
                     'source': 'boundaries',
                     'paint': {
-                        'line-color': 'white',
-                        'line-width': 3
+                        'line-color': '#000',
+                        'line-width': 2
                     }
                 });
 
