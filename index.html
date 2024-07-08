@@ -31,6 +31,7 @@
             right: 0;
             height: 100%;
             z-index: 1; /* Ensure the side panel is on top */
+            text-align: center; /* Center the title */
         }
         #map {
             flex-grow: 1;
@@ -63,7 +64,7 @@
     <main id="container">
         <div id="side-panel">
             <h2>Shooting Incidents in NYC</h2>
-            <button>Sort by Date</button>
+            <button>Sort by ID</button>
             <table>
                 <tr>
                     <th>id</th>
@@ -97,6 +98,9 @@
 
             table = document.getElementsByTagName("table")[0];
             let row, cell1, cell2, cell3;
+
+            // Sort shootings by id
+            shootings.features.sort((a, b) => parseInt(a.properties.incident_key) - parseInt(b.properties.incident_key));
 
             for (let feature of shootings.features) {
                 row = table.insertRow(-1);
@@ -149,9 +153,9 @@
         loadGeoJSON();
 
         let btn = document.getElementsByTagName("button")[0];
-        btn.addEventListener('click', sortTable);
+        btn.addEventListener('click', sortTableByID);
 
-        function sortTable() {
+        function sortTableByID() {
             let table, rows, switching, i, x, y, shouldSwitch;
             table = document.getElementsByTagName("table")[0];
             switching = true;
@@ -162,10 +166,10 @@
 
                 for (i = 1; i < (rows.length - 1); i++) {
                     shouldSwitch = false;
-                    x = new Date(rows[i].getElementsByTagName("td")[1].innerHTML);
-                    y = new Date(rows[i + 1].getElementsByTagName("td")[1].innerHTML);
+                    x = parseInt(rows[i].getElementsByTagName("td")[0].innerHTML);
+                    y = parseInt(rows[i + 1].getElementsByTagName("td")[0].innerHTML);
 
-                    if (x < y) {
+                    if (x > y) {
                         shouldSwitch = true;
                         break;
                     }
