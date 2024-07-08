@@ -32,13 +32,13 @@
 </head>
 <body>
     <h1>Earthquake Data Table</h1>
+    <button onclick="sortTable(1)">Sort by Magnitude</button>
     <table id="earthquakeTable">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Magnitude</th>
-                <th>Location</th>
-                <th>Time</th>
+                <th>id</th>
+                <th>magnitude</th>
+                <th>timestamp</th>
             </tr>
         </thead>
         <tbody>
@@ -55,12 +55,10 @@
                     const row = table.insertRow();
                     const idCell = row.insertCell(0);
                     const magCell = row.insertCell(1);
-                    const locCell = row.insertCell(2);
-                    const timeCell = row.insertCell(3);
+                    const timeCell = row.insertCell(2);
 
-                    idCell.textContent = index + 1;
+                    idCell.textContent = feature.properties.id;
                     magCell.textContent = feature.properties.mag;
-                    locCell.textContent = feature.properties.place;
                     timeCell.textContent = new Date(feature.properties.time).toLocaleString();
                 });
             });
