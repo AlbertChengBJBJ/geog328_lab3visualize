@@ -95,9 +95,6 @@
             boundaries = await response.json();
             console.log('Boundaries Data:', boundaries);
 
-            // Sort the shootings data by id
-            shootings.features.sort((a, b) => parseInt(a.properties.incident_key) - parseInt(b.properties.incident_key));
-
             table = document.getElementsByTagName("table")[0];
             let row, cell1, cell2, cell3;
 
