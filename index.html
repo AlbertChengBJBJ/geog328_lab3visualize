@@ -99,8 +99,8 @@
             table = document.getElementsByTagName("table")[0];
             let row, cell1, cell2, cell3;
 
-            // Sort shootings by id
-            shootings.features.sort((a, b) => parseInt(a.properties.incident_key) - parseInt(b.properties.incident_key));
+            // Sort shootings by date initially
+            shootings.features.sort((a, b) => new Date(a.properties.occur_date) - new Date(b.properties.occur_date));
 
             for (let feature of shootings.features) {
                 row = table.insertRow(-1);
@@ -169,7 +169,7 @@
                     x = parseInt(rows[i].getElementsByTagName("td")[0].innerHTML);
                     y = parseInt(rows[i + 1].getElementsByTagName("td")[0].innerHTML);
 
-                    if (x > y) {
+                    if (x < y) { // Reverse the order
                         shouldSwitch = true;
                         break;
                     }
