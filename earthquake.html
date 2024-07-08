@@ -5,22 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earthquake Data Table</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
         }
         th, td {
             padding: 8px 12px;
-            border: 1px solid #ccc;
+            text-align: left;
         }
         th {
             background-color: #f4f4f4;
+            cursor: pointer;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
     <h1>Earthquake Data Table</h1>
-    <table id="earthquake-table">
+    <table id="earthquakeTable">
         <thead>
             <tr>
                 <th>ID</th>
@@ -38,7 +50,7 @@
         fetch('assets/earthquakes.geojson')
             .then(response => response.json())
             .then(data => {
-                const table = document.getElementById('earthquake-table').getElementsByTagName('tbody')[0];
+                const table = document.getElementById('earthquakeTable').getElementsByTagName('tbody')[0];
                 data.features.forEach((feature, index) => {
                     const row = table.insertRow();
                     const idCell = row.insertCell(0);
@@ -52,6 +64,37 @@
                     timeCell.textContent = new Date(feature.properties.time).toLocaleString();
                 });
             });
+
+        function sortTable(n) {
+            const table = document.getElementById("earthquakeTable");
+            let switching = true, dir = "asc", switchcount = 0;
+            while (switching) {
+                switching = false;
+                const rows = table.rows;
+                for (let i = 1; i < (rows.length - 1); i++) {
+                    let shouldSwitch = false;
+                    const x = rows[i].getElementsByTagName("TD")[n];
+                    const y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc" && x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    } else if (dir == "desc" && x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>
