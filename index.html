@@ -1,1 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <title>Shooting Incidents in NYC</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
 
+    <!-- Including the Mapbox GL CSS file -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
+
+    <!-- Including the Mapbox GL JS file -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            display: flex;
+            height: 100vh;
+            flex-direction: row;
+            align-items: stretch;
+        }
+        #side-panel {
+            flex-basis: 500px;
+            overflow-y: scroll;
+            background: white;
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+        }
+        #map {
+            flex-grow: 1;
+            position: relative;
+        }
+        button {
+            margin-bottom: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            text-align: left;
+            padding: 16px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 1024px) {
+            #side-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main id="container">
+        <div id="side-panel">
+            <h2>Shooting Incidents in NYC</h2>
+            <button>Sort by Date</button>
+            <table>
+                <tr>
+                    <th>id</th>
+                    <th>date</th>
+                    <th>borough</th>
+                </tr>
+            </table>
+        </div>
+        <div id="map"></div>
+    </main>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYmVydHliZXJ0eTEyMyIsImEiOiJjbHljZmY3eDIxbjl2MmlvbWVvYTBvcXZiIn0.mI6pI_PqDEIcWn7rvCXF_w';
+
+        let map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10', // Different style from the tutorial
+            zoom: 10,
+            center: [-74.0060, 40.7128] // NYC coordinates
+        });
+
+        async function loadGeoJSON() {
+            let response, shootings, boundaries, table;
+            
+            response = await fetch('assets/deliverableData/NYPD Shooting Incident Data (Historic)_20240707.geojson');
+            shootings = await response.json();
+
+            response = await fetch('assets/deliverableData/Borough Boundaries.geojson');
+            boundaries = await response.json();
+
+            table = document.getElementsByTagName("table")[0];
+            let row, cell1, cell2, cell3;
+
+            for (let feature of shootings.features) {
+                row = table.insertRow(-1);
+                cell1 = row.insertCell(0);
+                cell2 = row.insertCell(1);
+                cell3 = row.insertCell(2);
+
+                cell1.innerHTML = feature.properties.INCIDENT_KEY;
+                cell2.innerHTML = new Date(feature.properties.OCCUR_DATE).toLocaleDateString("en-US");
+                cell3.innerHTML = feature.properties.BORO;
+            }
+
+            map.on('load', function () {
+                map.addSource('shootings', {
+                    type: 'geojson',
+                    data: shootings
+                });
+
+                map.addLayer({
+                    'id': 'shootings-layer',
+                    'type': 'circle',
+                    'source': 'shootings',
+                    'paint': {
+                        'circle-radius': 5,
+                        'circle-color': 'red',
+                        'circle-stroke-width': 1,
+                        'circle-stroke-color': 'white'
+                    }
+                });
+
+                map.addSource('boundaries', {
+                    type: 'geojson',
+                    data: boundaries
+                });
+
+                map.addLayer({
+                    'id': 'boundaries-layer',
+                    'type': 'line',
+                    'source': 'boundaries',
+                    'paint': {
+                        'line-color': '#000',
+                        'line-width': 2
+                    }
+                });
+            });
+        }
+
+        loadGeoJSON();
+
+        let btn = document.getElementsByTagName("button")[0];
+        btn.addEventListener('click', sortTable);
+
+        function sortTable() {
+            let table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementsByTagName("table")[0];
+            switching = true;
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = new Date(rows[i].getElementsByTagName("td")[1].innerHTML);
+                    y = new Date(rows[i + 1].getElementsByTagName("td")[1].innerHTML);
+
+                    if (x < y) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
